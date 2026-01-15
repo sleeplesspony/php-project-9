@@ -25,7 +25,22 @@ $container->set(
 
 $container->set(
     PDO::class, function () {
-        $conn = new PDO("pgsql:host=localhost;dbname=page_analyzer_db", 'shiny', 'localpass');
+        $databaseUrl = parse_url(getenv('DATABASE_URL'));
+        $user = $databaseUrl['user'];
+        $password = $databaseUrl['pass'];
+        $host = $databaseUrl['host'];
+        $port = $databaseUrl['port'];
+        $dbName = ltrim($databaseUrl['path'], '/');
+
+        $connStr = sprintf(
+            "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
+            $host,
+            $port,
+            $dbName,
+            $user,
+            $password
+        );
+        $conn = new PDO($connStr);
         $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         return $conn;
     }
