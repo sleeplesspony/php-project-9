@@ -7,6 +7,8 @@ use DI\Container;
 use Valitron\Validator;
 use Hexlet\Code\Url;
 use Hexlet\Code\UrlRepository;
+use Hexlet\Code\Check;
+use Hexlet\Code\CheckRepository;
 
 session_start();
 
@@ -52,15 +54,23 @@ $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
 $urlRepo = $container->get(UrlRepository::class);
+$checkRepo = $container->get(CheckRepository::class);
 
 $app->get('/', function ($request, $response) {
         return $this->get('renderer')->render($response, 'index.phtml');
     }
 )->setName('index');
 
-$app->get('/urls', function ($request, $response) use ($urlRepo) {
+$app->get('/urls', function ($request, $response) use ($urlRepo, $checkRepo) {
 
         $urls = $urlRepo->getUrlsData();
+        $checks = $checkRepo->getLastChecks();
+        foreach($urls as $key => $url) {
+            foreach($checks as $check) {
+                if ($url["id"] == $check["url_id"])
+                    $urls[$key]['check'] = $check;
+            }
+        }
         $params = ['urls' => $urls];
         return $this->get('renderer')->render($response, 'urls.phtml', $params);
     }
@@ -101,17 +111,21 @@ $app->post('/urls', function ($request, $response) use ($router, $urlRepo) {
     }
 )->setName('post-urls');
 
-$app->get('/urls/{id}', function ($request, $response, array $args) use ($urlRepo) {
+$app->get('/urls/{id}', function ($request, $response, array $args) use ($urlRepo, $checkRepo) {
         $id = (int)$args['id'];
         $url = $urlRepo->getUrlById($id);
         if (!is_null($url)) {
+
             $messages = $this->get('flash')->getMessages();
+
+            $checks = $checkRepo->getChecksDataByUrlId($url->getId());
 
             $params = [
                 'id' => $url->getId(),
                 'name' => $url->getName(),
                 'createdAt' => $url->getCreatedAt(),
-                'message' => $messages['success'][0] ?? ''
+                'message' => $messages['success'][0] ?? '',
+                'checks' => $checks
             ];
             return $this->get('renderer')->render($response, 'url.phtml', $params);
         }
@@ -119,6 +133,14 @@ $app->get('/urls/{id}', function ($request, $response, array $args) use ($urlRep
         return $this->get('renderer')->render($response->withStatus(404), '404.phtml');
     }
 )->setName('url');
+
+$app->post('/urls/{url_id}/checks', function ($request, $response, array $args) use ($checkRepo, $router) {
+    $urlId = (int)$args['url_id'];
+    $check = new Check($urlId);
+    $checkRepo->save($check);
+    return $response->withRedirect($router->urlFor('url', ['id' => $urlId]));
+    }
+)->setName('post-check');
 
 $app->run();
 

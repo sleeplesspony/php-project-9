@@ -42,6 +42,14 @@
                 </thead>
                 <tbody>
                     <?php foreach ($checks as $check): ?>
+                    <tr>
+                        <td><?=$check["id"]?></td>
+                        <td><?php echo $check["status_code"]?></td>
+                        <td><?php echo $check["h1"]?></td>
+                        <td><?php echo $check["title"]?></td>
+                        <td><?php echo $check["description"]?></td>
+                        <td><?php echo $check["created_at"]?></td>
+                    </tr>
                     <?php endforeach ?>
                 </tbody>
             </table>
