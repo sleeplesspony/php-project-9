@@ -1,7 +1,11 @@
     <?php echo $this->fetch("header.phtml");?>
 
-    <?php if($message): ?>
-    <div class="alert alert-success" role="alert"><?=$message;?></div>
+    <?php if($successMes): ?>
+    <div class="alert alert-success" role="alert"><?=$successMes;?></div>
+    <?php endif ?>
+
+    <?php if($errorMes) : ?>
+    <div class="alert alert-danger" role="alert"><?php echo $errorMes;?></div>
     <?php endif ?>
 
     <main class="flex-grow-1">

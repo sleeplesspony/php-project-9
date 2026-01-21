@@ -25,4 +25,14 @@ class Check
         $this->id = $id;
     }
 
+    public function setCode(int $code): void
+    {
+        $this->code = $code;
+    }
+
+    public function getCode(): ?int
+    {
+        return $this->code;
+    }
+
 }

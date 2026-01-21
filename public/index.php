@@ -9,6 +9,8 @@ use Hexlet\Code\Url;
 use Hexlet\Code\UrlRepository;
 use Hexlet\Code\Check;
 use Hexlet\Code\CheckRepository;
+use Hexlet\Code\UrlChecker;
+use GuzzleHttp\Exception\GuzzleException;
 
 session_start();
 
@@ -117,6 +119,8 @@ $app->get('/urls/{id}', function ($request, $response, array $args) use ($urlRep
         if (!is_null($url)) {
 
             $messages = $this->get('flash')->getMessages();
+            $successMes = $messages['success'][0] ?? '';
+            $errorMes = $messages['error'][0] ?? '';
 
             $checks = $checkRepo->getChecksDataByUrlId($url->getId());
 
@@ -124,7 +128,8 @@ $app->get('/urls/{id}', function ($request, $response, array $args) use ($urlRep
                 'id' => $url->getId(),
                 'name' => $url->getName(),
                 'createdAt' => $url->getCreatedAt(),
-                'message' => $messages['success'][0] ?? '',
+                'successMes' => $successMes,
+                'errorMes' => $errorMes,
                 'checks' => $checks
             ];
             return $this->get('renderer')->render($response, 'url.phtml', $params);
@@ -134,10 +139,20 @@ $app->get('/urls/{id}', function ($request, $response, array $args) use ($urlRep
     }
 )->setName('url');
 
-$app->post('/urls/{url_id}/checks', function ($request, $response, array $args) use ($checkRepo, $router) {
+$app->post('/urls/{url_id}/checks', function ($request, $response, array $args) use ($urlRepo, $checkRepo, $router) {
+
     $urlId = (int)$args['url_id'];
-    $check = new Check($urlId);
-    $checkRepo->save($check);
+    $url = $urlRepo->getUrlById($urlId);
+
+    try {
+        $checkData = UrlChecker::getUrlCheckData($url->getName());
+            $check = new Check($urlId);
+            $check->setCode($checkData['code']);
+            $checkRepo->save($check);
+            $this->get('flash')->addMessage('success', 'Страница успешно проверена');
+    } catch (GuzzleException $e) {
+        $this->get('flash')->addMessage('error', 'Произошла ошибка, не удалось проверить страницу');
+    }
     return $response->withRedirect($router->urlFor('url', ['id' => $urlId]));
     }
 )->setName('post-check');
