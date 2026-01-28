@@ -14,12 +14,18 @@ class CheckRepository
 
     public function save(Check $check): void
     {
-        $sql = "INSERT INTO url_checks (url_id, status_code) VALUES (:url_id, :code)";
+        $sql = "INSERT INTO url_checks (url_id, status_code, h1, title, description) VALUES (:url_id, :code, :h1, :title, :description)";
         $stmt = $this->conn->prepare($sql);
         $urlId = $check->getUrlId();
         $code = $check->getCode();
+        $h1 = $check->getH1();
+        $title = $check->getTitle();
+        $description = $check->getDescription();
         $stmt->bindParam(':url_id', $urlId);
         $stmt->bindParam(':code', $code);
+        $stmt->bindParam(':h1', $h1);
+        $stmt->bindParam(':title', $title);
+        $stmt->bindParam(':description', $description);
         $stmt->execute();
         $id = (int) $this->conn->lastInsertId();
         $check->setId($id);
