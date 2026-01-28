@@ -1,4 +1,10 @@
 
+    <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+?>
+
     <?=$this->fetch("header.phtml");?>
     <main class="flex-grow-1">
         <div class="container-lg mt-3">
@@ -19,8 +25,8 @@
                                 <tr>
                                     <td><?=$url['id']?></td>
                                     <td><a href="urls/<?=$url['id']?>"><?=$url['name']?></a></td>
-                                    <td><?=$url['check']['created_at']?></td>
-                                    <td><?=$url['check']['status_code']?></td>
+                                    <td><? isset($url['check']) ? $url['check']['created_at'] : ""?></td>
+                                    <td><?=isset($url['check']) ? $url['check']['status_code'] : ""?></td>
                                 </tr>
                             <?php endforeach ?>
                         <?php endif ?>
