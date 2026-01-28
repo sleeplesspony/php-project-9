@@ -1,10 +1,3 @@
-
-    <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-?>
-
     <?=$this->fetch("header.phtml");?>
     <main class="flex-grow-1">
         <div class="container-lg mt-3">
@@ -20,12 +13,13 @@ error_reporting(E_ALL);
                         </tr>
                     </thead>
                     <tbody>
+                        <?//=print_r($urls)?>
                         <?php if(count($urls) > 0): ?>
                             <?php foreach ($urls as $url): ?>
                                 <tr>
                                     <td><?=$url['id']?></td>
                                     <td><a href="urls/<?=$url['id']?>"><?=$url['name']?></a></td>
-                                    <td><? isset($url['check']) ? $url['check']['created_at'] : ""?></td>
+                                    <td><?=isset($url['check']) ? $url['check']['created_at'] : ""?></td>
                                     <td><?=isset($url['check']) ? $url['check']['status_code'] : ""?></td>
                                 </tr>
                             <?php endforeach ?>
